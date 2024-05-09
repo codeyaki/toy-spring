@@ -36,9 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
-**/application.**
-
-
 ### Database ###
 *.accdb
 *.db
@@ -231,4 +228,4 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
-**/Wallet_toyDatabase/
+**/config-file/
