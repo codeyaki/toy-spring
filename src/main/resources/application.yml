@@ -1,6 +1,3 @@
-server:
-  port: 80
-
 spring:
   config:
     import: classpath:config-file/application-db.yml
@@ -15,5 +12,26 @@ spring:
     group:
       dev-window:
         - db-window
+        - dev-port
       prod:
         - db-prod
+        - prod-port
+
+--- # 개발 서버 포트
+spring:
+  config:
+    activate:
+      on-profile: "dev-port"
+
+server:
+  port: 80
+
+
+--- # prod 서버 포트
+spring:
+  config:
+    activate:
+      on-profile: "prod-port"
+
+server:
+  port: 8080
