@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>헬로월드 로또 추첨기</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+      }
+      .container {
+          margin-top: 20px;
+          text-align: center;
+      }
+      .numbers {
+          margin-top: 20px;
+          font-size: 24px;
+      }
+      .result, .status {
+          margin-top: 20px;
+          font-size: 20px;
+      }
+      .result {
+          color: green;
+      }
+      .warning {
+          margin-top: 20px;
+          font-size: 20px;
+          color: red;
+      }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1><del>헬로월드</del> 금금 로또 추첨기</h1>
+  <button id="startButton" onclick="startLottery()">추첨 시작</button>
+  <button id="stopButton" onclick="stopLottery()" style="display: none;">추첨 정지</button>
+  <div class="numbers" id="numbers">로또 번호: </div>
+  <div class="result" id="result">
+    시도 횟수: 0회<br>
+    당첨 횟수:<br>
+    1등: 0회<br>
+    2등: 0회<br>
+    3등: 0회<br>
+    4등: 0회<br>
+    5등: 0회
+  </div>
+  <div class="status" id="status"></div>
+  <div class="warning" id="warning"></div>
+</div>
+
+<script>
+  let interval;
+  let moneySpent = 0;
+  let money = 0; // 시작 금액 0원
+
+  function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateLottoNumbers() {
+    const numbers = new Set();
+    while (numbers.size < 6) {
+      numbers.add(getRandomNumber(1, 45));
+    }
+    return Array.from(numbers).sort((a, b) => a - b);
+  }
+
+  function compareNumbers(userNumbers, lottoNumbers) {
+    return userNumbers.filter(num => lottoNumbers.includes(num)).length;
+  }
+
+  function startLottery() {
+    document.getElementById('startButton').style.display = 'none';
+    document.getElementById('stopButton').style.display = 'inline';
+
+    let attempts = 0;
+    let wins = [0, 0, 0, 0, 0]; // 0부터 4까지 등수별 당첨 횟수 (5등부터 1등)
+    const ticketPrice = 5000; // 로또 1번 가격 5천원
+    const prizeMoney = [5000, 100000, 1000000, 100000000, 2000000000]; // 당첨금: 5등 5천원, 4등 10만원, 3등 100만원, 2등 1억, 1등 20억
+    const maxAttempts = 100000; // 최대 시도 횟수 설정
+    let userNumbers;
+    let lottoNumbers;
+    const resultDiv = document.getElementById('result');
+    const numbersDiv = document.getElementById('numbers');
+    const statusDiv = document.getElementById('status');
+    const warningDiv = document.getElementById('warning');
+    resultDiv.innerHTML = `시도 횟수: 0회<br>당첨 횟수:<br>1등: 0회<br>2등: 0회<br>3등: 0회<br>4등: 0회<br>5등: 0회`;
+    numbersDiv.innerHTML = '로또 번호: ';
+    statusDiv.innerHTML = `시작 금액: ${money.toLocaleString()}원, 로또에 사용한 금액: ${moneySpent.toLocaleString()}원`;
+    warningDiv.innerHTML = '';
+
+    interval = setInterval(() => {
+      attempts++;
+      moneySpent += ticketPrice;
+      userNumbers = generateLottoNumbers();
+      lottoNumbers = generateLottoNumbers();
+      const matchingCount = compareNumbers(userNumbers, lottoNumbers);
+      numbersDiv.innerHTML = `사용자 번호: ${userNumbers.join(', ')}<br>로또 번호: ${lottoNumbers.join(', ')}<br>일치하는 숫자: ${matchingCount}개`;
+
+      if (matchingCount >= 3) { // 3개 맞추면 5등, 4개 맞추면 4등, 5개 맞추면 3등, 6개 맞추면 2등 또는 1등
+        wins[matchingCount - 3]++;
+        money += prizeMoney[matchingCount - 3];
+        resultDiv.innerHTML = `시도 횟수: ${attempts}회<br>당첨 횟수:<br>1등: ${wins[4]}회<br>2등: ${wins[3]}회<br>3등: ${wins[2]}회<br>4등: ${wins[1]}회<br>5등: ${wins[0]}회<br>1등 당첨 번호: ${matchingCount === 6 ? lottoNumbers.join(', ') : ''}`;
+      } else {
+        resultDiv.innerHTML = `시도 횟수: ${attempts}회<br>당첨 횟수:<br>1등: ${wins[4]}회<br>2등: ${wins[3]}회<br>3등: ${wins[2]}회<br>4등: ${wins[1]}회<br>5등: ${wins[0]}회`;
+      }
+
+      statusDiv.innerHTML = `시도 횟수: ${attempts}회<br>내 돈: ${money.toLocaleString()}원, 로또에 사용한 금액: ${moneySpent.toLocaleString()}원`;
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        warningDiv.innerHTML = `최대 시도 횟수(${maxAttempts}회)를 초과하였습니다. 다시 시도해주세요.`;
+        document.getElementById('startButton').style.display = 'inline';
+        document.getElementById('stopButton').style.display = 'none';
+      }
+    }, 100); // 100ms 간격으로 추첨
+  }
+
+  function stopLottery() {
+    clearInterval(interval);
+    document.getElementById('startButton').style.display = 'inline';
+    document.getElementById('stopButton').style.display = 'none';
+    document.getElementById('warning').innerHTML = '추첨이 중지되었습니다.';
+  }
+</script>
+</body>
+</html>
